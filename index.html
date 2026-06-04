@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weather App</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="weather-card">
+        <div class="search-container">
+            <input type="text" id="city-input" placeholder="Enter city name">
+            <button id="search-btn">&#x1F50D;</button>
+        </div>
+        <div class="weather-info">
+            <div id="loader" class="loader hidden"></div>
+            <div id="error-message" class="hidden"></div>
+            <div id="weather-data" class="hidden">
+                <p id="datetime"></p>
+                <h2 id="city-name"></h2>
+                <p id="temperature"></p>
+                <p id="humidity"></p>
+                <p id="wind-speed"></p>
+                <p id="weather-description"></p>
+                <img id="weather-icon" src="" alt="Weather Icon">
+                <div class="advanced-info">
+                    <p id="feels-like"></p>
+                    <p id="sunrise"></p>
+                    <p id="sunset"></p>
+                </div>
+                <p id="last-updated"></p>
+            </div>
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
