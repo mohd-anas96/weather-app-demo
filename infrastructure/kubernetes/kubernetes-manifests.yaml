@@ -1,0 +1,132 @@
+
+# Kubernetes Manifests for the Weather Application
+
+# This file contains all the Kubernetes manifests required to deploy the weather application.
+# It includes a Namespace, ConfigMap, Deployment, and Service.
+# Apply this file to your Kubernetes cluster using `kubectl apply -f kubernetes-manifests.yaml`
+
+# --- Namespace ---
+# A Namespace provides a way to isolate groups of resources within a single cluster.
+# This is a production best practice to avoid naming conflicts and to provide a scope for resource quotas.
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: weather-app-prod
+
+---
+
+# --- ConfigMap ---
+# A ConfigMap is used to store non-confidential configuration data in key-value pairs.
+# In this case, we are using it to store the Nginx configuration.
+# This allows us to update the Nginx configuration without rebuilding the Docker image.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: weather-app-nginx-conf
+  namespace: weather-app-prod
+data:
+  nginx.conf: |
+    events {}
+    http {
+      include       /etc/nginx/mime.types;
+      default_type  application/octet-stream;
+
+      server {
+        listen 80;
+        server_name localhost;
+
+        root /usr/share/nginx/html;
+        index index.html;
+
+        location / {
+          try_files $uri $uri/ =404;
+        }
+      }
+    }
+
+---
+
+# --- Deployment ---
+# A Deployment manages a set of replica Pods. It ensures that a specified number of Pods are running at all times.
+# This Deployment will run the weather application using the Docker image built from the provided Dockerfile.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: weather-app-deployment
+  namespace: weather-app-prod
+  labels:
+    app: weather-app
+spec:
+  # Using multiple replicas for high availability.
+  replicas: 3
+  selector:
+    matchLabels:
+      app: weather-app
+  template:
+    metadata:
+      labels:
+        app: weather-app
+    spec:
+      containers:
+      - name: weather-app
+        # It's a best practice to use a specific image tag for production deployments
+        # instead of `latest` to ensure predictable deployments.
+        image: your-docker-registry/weather-app:1.0.0 # Replace with your image
+        ports:
+        - containerPort: 80
+        # Liveness and readiness probes are crucial for production deployments.
+        # The liveness probe checks if the container is running, and if it fails, Kubernetes will restart the container.
+        # The readiness probe checks if the container is ready to accept traffic.
+        livenessProbe:
+          httpGet:
+            path: /index.html
+            port: 80
+          initialDelaySeconds: 5
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /index.html
+            port: 80
+          initialDelaySeconds: 5
+          periodSeconds: 5
+        # Setting resource requests and limits is a best practice to ensure predictable performance and resource allocation.
+        resources:
+          requests:
+            cpu: "100m"
+            memory: "128Mi"
+          limits:
+            cpu: "250m"
+            memory: "256Mi"
+        # Mounting the ConfigMap as a volume to override the default Nginx configuration.
+        volumeMounts:
+        - name: nginx-conf-volume
+          mountPath: /etc/nginx/nginx.conf
+          subPath: nginx.conf
+      volumes:
+      - name: nginx-conf-volume
+        configMap:
+          name: weather-app-nginx-conf
+
+---
+
+# --- Service ---
+# A Service exposes an application running on a set of Pods as a network service.
+# This Service will use a LoadBalancer to expose the weather application to the internet.
+# For cloud environments, this will provision an external load balancer.
+apiVersion: v1
+kind: Service
+metadata:
+  name: weather-app-service
+  namespace: weather-app-prod
+spec:
+  # Using LoadBalancer to expose the service outside of the cluster.
+  # For on-premise clusters, you might want to use NodePort or an Ingress controller.
+  type: LoadBalancer
+  selector:
+    app: weather-app
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80
+      # nodePort is only required for NodePort service type.
+      # nodePort: 30080

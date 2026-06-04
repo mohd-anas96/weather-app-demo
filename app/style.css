@@ -43,7 +43,7 @@ body {
     margin-bottom: 30px;
 }
 
-#city-input {
+.city-input {
     flex-grow: 1;
     background: transparent;
     border: none;
@@ -55,23 +55,23 @@ body {
     transition: border-color 0.3s ease;
 }
 
-#city-input::placeholder {
+.city-input::placeholder {
     color: var(--text-color);
     opacity: 0.7;
 }
 
-#city-input:focus {
+.city-input:focus {
     border-bottom-color: var(--primary-color);
 }
 
-#search-btn {
+.search-btn, .location-btn {
     background: var(--primary-color);
     color: white;
     border: none;
     border-radius: 50%;
     width: 50px;
     height: 50px;
-    margin-left: 15px;
+    margin-left: 10px;
     cursor: pointer;
     font-size: 20px;
     display: flex;
@@ -80,7 +80,7 @@ body {
     transition: background-color 0.3s ease, transform 0.3s ease;
 }
 
-#search-btn:hover {
+.search-btn:hover, .location-btn:hover {
     background-color: #2980b9;
     transform: scale(1.1);
 }
@@ -89,11 +89,11 @@ body {
     text-align: center;
 }
 
-#weather-data {
+.weather-data {
     display: none;
 }
 
-#weather-data.fade-in {
+.weather-data.fade-in {
     display: block;
     animation: fadeIn 0.5s ease-in-out;
 }
@@ -103,35 +103,35 @@ body {
     to { opacity: 1; transform: translateY(0); }
 }
 
-#datetime {
+.datetime {
     font-size: 0.9em;
     margin-bottom: 20px;
 }
 
-#city-name {
+.city-name {
     font-size: 2em;
     font-weight: 600;
     margin-bottom: 10px;
 }
 
-#temperature {
+.temperature {
     font-size: 3em;
     font-weight: 700;
     margin-bottom: 10px;
 }
 
-#weather-description {
+.weather-description {
     font-size: 1.2em;
     font-style: italic;
     margin-bottom: 20px;
 }
 
-#humidity, #wind-speed {
+.humidity, .wind-speed {
     font-size: 1em;
     margin-bottom: 10px;
 }
 
-#weather-icon {
+.weather-icon {
     width: 120px;
     height: 120px;
     margin-top: 10px;
@@ -148,7 +148,7 @@ body {
     font-size: 0.9em;
 }
 
-#last-updated {
+.last-updated {
     font-size: 0.8em;
     margin-top: 20px;
     opacity: 0.7;
@@ -169,7 +169,7 @@ body {
     100% { transform: rotate(360deg); }
 }
 
-#error-message {
+.error-message {
     color: #ff6b6b;
     font-weight: 500;
 }
@@ -183,7 +183,7 @@ body {
         padding: 20px;
     }
 
-    #city-name {
+    .city-name {
         font-size: 1.5em;
     }
     .advanced-info {
@@ -195,11 +195,11 @@ body {
         margin-bottom: 10px;
     }
 
-    #temperature {
+    .temperature {
         font-size: 2.5em;
     }
 
-    #search-btn {
+    .search-btn {
         width: 45px;
         height: 45px;
     }

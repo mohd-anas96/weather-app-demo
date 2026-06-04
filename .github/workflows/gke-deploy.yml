@@ -1,0 +1,52 @@
+
+# GitHub Actions CI/CD pipeline for deploying the weather app to Google Kubernetes Engine (GKE)
+name: Deploy to GKE
+
+on:
+  push:
+    branches:
+      - main
+
+env:
+  PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
+  GKE_CLUSTER: your-gke-cluster-name # TODO: Replace with your GKE cluster name
+  GKE_ZONE: your-gke-cluster-zone # TODO: Replace with your GKE cluster zone
+  ARTIFACT_REGISTRY: your-artifact-registry-name # TODO: Replace with your Artifact Registry name
+  IMAGE: weather-app
+
+jobs:
+  deploy:
+    name: Build and Deploy
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Authenticate with Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+
+      - name: Configure Docker
+        run: gcloud auth configure-docker ${{ env.GKE_ZONE }}-docker.pkg.dev
+
+      - name: Build and Push Docker Image
+        run: |
+          docker build -t $IMAGE:latest .
+          docker tag $IMAGE:latest ${{ env.GKE_ZONE }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.ARTIFACT_REGISTRY }}/$IMAGE:$GITHUB_SHA
+          docker push ${{ env.GKE_ZONE }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.ARTIFACT_REGISTRY }}/$IMAGE:$GITHUB_SHA
+
+      - name: Update Kubernetes Manifest
+        run: |
+          sed -i "s|your-docker-registry/weather-app:1.0.0|${{ env.GKE_ZONE }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.ARTIFACT_REGISTRY }}/$IMAGE:$GITHUB_SHA|g" infrastructure/kubernetes/kubernetes-manifests.yaml
+
+      - name: Get GKE Credentials
+        run: |
+          gcloud container clusters get-credentials ${{ env.GKE_CLUSTER }} --zone ${{ env.GKE_ZONE }}
+
+      - name: Deploy to GKE
+        run: |
+          kubectl apply -f infrastructure/kubernetes/kubernetes-manifests.yaml

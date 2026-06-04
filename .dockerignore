@@ -1,0 +1,9 @@
+
+.git
+.gitignore
+Dockerfile
+main.tf
+variables.tf
+outputs.tf
+docs/
+Testing.md
